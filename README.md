@@ -91,37 +91,32 @@ For more examples of basic validation usage, see the SQLAlchemy Guide for
 ```py
 from sqlalchemy.orm import validates
 
-Use email example here .
-
-class Person(Base):
-    __tablename__ = 'person'
+class EmailAddress(Base):
+    __tablename__ = 'address'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    email = Column(String)
 
-    @validates('name')
-    def validate_name(self, key, name):
-        if name.strip() == '':
-            raise ValueError("failed name validation.")
-        return name
+    @validates('email')
+    def validate_email(self, key, address):
+        if '@' not in address:
+            raise ValueError("failed simple email validation")
+        return address
 
 
-# $ Person = Person(name='')   
-# $ db.session.add(user)  
-# => ValueError: failed name validation
 
-```
+# $ Email = EmailAddress(email='johngmail.com')   
+# $ db.session.add(Email)  
+# => ValueError: failed simple email validation
 
-```py
-# Add arguments explanation key.
 ```
 
 `validates` is our Swiss Army knife for validations. It takes two arguments:
 the first is the **name of the attribute** we want to validate, and the second
 is a **hash of options** that will include the details of how to validate it.
 
-In this example, we wrote a `validate_name()` function, preventing the object from being saved if its
-`name` attribute is empty. We can return a custom message by raising a ValueError with the message.
+In this example, we wrote a `validate_email()` function, preventing the object from being saved if its
+`email` attribute does not include `@`. We can return a custom message by raising a ValueError with the message.
 
 ## Conclusion
 
