@@ -105,18 +105,37 @@ class EmailAddress(Base):
 
 
 
-# $ Email = EmailAddress(email='johngmail.com')   
-# $ db.session.add(Email)  
-# => ValueError: failed simple email validation
-
+# email = EmailAddress(email='banana')
+# session.add(email)
+# ValueError: failed simple email validation
 ```
-
-`validates` is our Swiss Army knife for validations. It takes two arguments:
-the first is the **name of the attribute** we want to validate, and the second
-is a **hash of options** that will include the details of how to validate it.
 
 In this example, we wrote a `validate_email()` function, preventing the object from being saved if its
 `email` attribute does not include `@`. We can return a custom message by raising a ValueError with the message.
+
+`validates` is our Swiss Army knife for validations. First you need to use a decorator which takes a string of the columns you want to validate.
+the first argument is the **key** we want to validate (the key's value will be the 'email'), and the second argument is the value of what we want to validate.
+We can validate multiple columns if we pass multiple column names into the validates decorator.
+
+Here is an example of validating multiple columns with one validate function.
+
+```py
+class EmailAddress(base):
+    __tablename__ = 'address'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+    backup_email = Column(String)
+
+    @validates('email', 'backup_email')
+    def validate_email(self, key, address):
+        if '@' not in address:
+            raise ValueError("failed simple email validation")
+        return address
+```
+
+In this example the `validate_email` function will validate both `email` and the `backup_email` column. We can figure out which column we are validating by
+checking the `key` attribute. The key attribute will be `email` or `backup_email` because those are the columns we passed into the decorator.
 
 ## Conclusion
 
@@ -124,6 +143,54 @@ In this lesson, we learned the importance of validating data to ensure that no
 bad data ends up in our database. We also discussed the difference between model
 validations and database constraints. Finally, we saw some common methods for
 implementing validations on our models using SQLAlchemy.
+
+***
+
+## Complete code
+
+```py
+import sqlalchemy
+
+from sqlalchemy import CheckConstraint
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import validates
+
+
+connection_string = "sqlite:///database.db"   # for SQLite, local file
+db   = create_engine(connection_string)
+base = declarative_base()
+
+from sqlalchemy.orm import validates
+
+class EmailAddress(base):
+    __tablename__ = 'address'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+
+    @validates('email')
+    def validate_email(self, key, address):
+        if '@' not in address:
+            raise ValueError("failed simple email validation")
+        return address
+
+Session = sessionmaker(db)
+session = Session()
+
+base.metadata.create_all(db)
+
+email = EmailAddress(email='banana')
+session.add(email)
+
+try:
+    session.commit()
+except sqlalchemy.exc.IntegrityError as e:
+    print("Integrity violation blocked!")
+    session.rollback()
+
+```
 
 ***
 
