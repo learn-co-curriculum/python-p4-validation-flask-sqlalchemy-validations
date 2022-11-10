@@ -2,16 +2,19 @@
 
 ## Learning Goals
 
-After this lesson, you should be able to:
-
-- Explain the purpose of validation
-- Add custom validation errors
+- Define constraints and validations in data processing.
+- Ensure that only acceptable input is sent to the database using validations.
 
 ***
 
 ## Key Vocab
 
-- **Validation**: Validation is an automatic check to ensure that data entered is sensible and feasible.
+- **Constraint**: a rule enforced on the data columns of a table. Ensures that
+  only appropriate data is saved to the database.
+- **Validation**: an automatic check to ensure that data entered
+  is sensible and feasible.
+- **Forms**: A web form (or HTML form) is a place where users enter data or
+  personal information that's then sent to a server for processing.
 
 ***
 
@@ -19,9 +22,9 @@ After this lesson, you should be able to:
 
 What is a "validation"?
 
-In the context of Python, **validations** are special method calls that go at the top
-of model class definitions and prevent them from being saved to the database if
-their data doesn't look right.
+In the context of Python, **validations** are special method calls that go at
+the top of model class definitions and prevent them from being saved to the
+database if their data doesn't look right.
 
 In general, **validations** consist of code that performs the job of protecting
 the database from invalid data.
@@ -51,7 +54,7 @@ while others rely on SQLAlchemy Validations alone. Ultimately, it depends on
 how the developer plans to add and update data in the database. In this lesson,
 we'll be focusing on SQLAlchemy Validations.
 
-### What is "invalid data"?
+### What is "Invalid Data"?
 
 Suppose you get a new phone and you ask all of your friends for their phone
 number again. One of them tells you, "555-868-902". If you're paying attention,
@@ -105,17 +108,22 @@ class EmailAddress(Base):
 
 
 
-# email = EmailAddress(email='banana')
-# session.add(email)
-# ValueError: failed simple email validation
+email = EmailAddress(email='banana')
+session.add(email)
+# => ValueError: failed simple email validation
+
 ```
 
-In this example, we wrote a `validate_email()` function, preventing the object from being saved if its
-`email` attribute does not include `@`. We can return a custom message by raising a ValueError with the message.
+In this example, we wrote a `validate_email()` function, preventing the object
+from being saved if its `email` attribute does not include `@`. We can return a
+custom message by raising a ValueError with the message.
 
-`validates` is our Swiss Army knife for validations. First you need to use a decorator which takes a string of the columns you want to validate.
-the first argument is the **key** we want to validate (the key's value will be the 'email'), and the second argument is the value of what we want to validate.
-We can validate multiple columns if we pass multiple column names into the validates decorator.
+`validates` is our Swiss Army knife for validations. First you need to use a
+decorator which takes a string of the columns you want to validate.
+the first argument is the **key** we want to validate (the key's value will be
+the 'email'), and the second argument is the value of what we want to validate.
+We can validate multiple columns if we pass multiple column names into the
+validates decorator.
 
 Here is an example of validating multiple columns with one validate function.
 
@@ -134,8 +142,12 @@ class EmailAddress(base):
         return address
 ```
 
-In this example the `validate_email` function will validate both `email` and the `backup_email` column. We can figure out which column we are validating by
-checking the `key` attribute. The key attribute will be `email` or `backup_email` because those are the columns we passed into the decorator.
+In this example the `validate_email` function will validate both `email` and the
+`backup_email` column. We can figure out which column we are validating by
+checking the `key` attribute. The key attribute will be `email` or
+`backup_email` because those are the columns we passed into the decorator.
+
+***
 
 ## Conclusion
 
@@ -146,7 +158,7 @@ implementing validations on our models using SQLAlchemy.
 
 ***
 
-## Complete code
+## Solution Code
 
 ```py
 import sqlalchemy
@@ -196,6 +208,6 @@ except sqlalchemy.exc.IntegrityError as e:
 
 ## Resources
 
-- [SQLAlchemy Validations][SQLAlchemy Validations]
+- [Changing Attribute Behavior - SQLAlchemy][SQLAlchemy Validations]
 
 [SQLAlchemy Validations]: https://docs.sqlalchemy.org/en/14/orm/mapped_attributes.html
